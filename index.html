@@ -1,56 +1,94 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Fútbol Feed — PWA</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0b5f3b">
-<link rel="icon" href="/icons/icon-192.png">
-<link rel="stylesheet" href="/styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Fútbol Feed ⚽ — PWA</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b5f3b">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+  <meta name="description" content="La mejor app de contenido futbolero. Goles, noticias y mucho más.">
 </head>
 <body>
-<header class="topbar">
-<h1>Fútbol Feed ⚽</h1>
-<button id="installBtn" class="install-btn" aria-label="Instalar aplicación">Instalar</button>
-</header>
+  <header class="topbar">
+    <div class="header-content">
+      <div class="logo">
+        <span class="logo-icon">⚽</span>
+        <h1>Fútbol Feed</h1>
+      </div>
+      <button id="installBtn" class="install-btn" aria-label="Instalar aplicación">
+        <span class="btn-icon">📱</span>
+        <span class="btn-text">Instalar</span>
+      </button>
+    </div>
+  </header>
 
+  <main id="app" class="feed">
+    <!-- Los posts se generan desde app.js -->
+  </main>
 
-<main id="app" class="feed">
-<!-- Los posts se generan desde app.js -->
-</main>
+  <nav class="bottomnav">
+    <button class="nav-btn active" data-tab="feed">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-text">Inicio</span>
+    </button>
+    <button class="nav-btn" data-tab="explore">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-text">Explorar</span>
+    </button>
+    <button class="nav-btn" data-tab="upload">
+      <span class="nav-icon">📤</span>
+      <span class="nav-text">Subir</span>
+    </button>
+    <button class="nav-btn" data-tab="profile">
+      <span class="nav-icon">👤</span>
+      <span class="nav-text">Perfil</span>
+    </button>
+  </nav>
 
+  <template id="post-template">
+    <article class="post">
+      <div class="post-header">
+        <img class="avatar" src="https://picsum.photos/40?random=1" alt="avatar">
+        <div class="user-info">
+          <div class="username">@usuario</div>
+          <div class="meta">Hoy · Liga</div>
+        </div>
+        <button class="follow-btn">Seguir</button>
+      </div>
+      <div class="post-media">
+        <img class="media-img" src="" alt="imagen de futbol">
+        <div class="media-overlay">
+          <button class="play-btn" aria-label="Reproducir video">▶️</button>
+        </div>
+      </div>
+      <div class="post-actions">
+        <button class="action-btn like-btn">
+          <span class="action-icon">❤️</span>
+          <span class="count">0</span>
+        </button>
+        <button class="action-btn comment-btn">
+          <span class="action-icon">💬</span>
+          <span class="count">0</span>
+        </button>
+        <button class="action-btn share-btn">
+          <span class="action-icon">🔗</span>
+        </button>
+        <button class="action-btn bookmark-btn">
+          <span class="action-icon">🔖</span>
+        </button>
+      </div>
+      <div class="post-caption"></div>
+      <div class="post-stats">
+        <span class="stat"><strong>0</strong> likes</span>
+        <span class="stat"><strong>0</strong> comentarios</span>
+      </div>
+    </article>
+  </template>
 
-<nav class="bottomnav">
-<button class="nav-btn active">Feed</button>
-<button class="nav-btn">Explorar</button>
-<button class="nav-btn">Subir</button>
-<button class="nav-btn">Perfil</button>
-</nav>
+  <div id="notification" class="notification" aria-live="polite"></div>
 
-
-<template id="post-template">
-<article class="post">
-<div class="post-header">
-<img class="avatar" src="https://picsum.photos/40?random=1" alt="avatar">
-<div>
-<div class="username">@usuario</div>
-<div class="meta">Hoy · Liga</div>
-</div>
-</div>
-<div class="post-media">
-<img class="media-img" src="" alt="imagen de futbol">
-</div>
-<div class="post-actions">
-<button class="like-btn">❤️ <span class="count">0</span></button>
-<button class="comment-btn">💬</button>
-<button class="share-btn">🔗</button>
-</div>
-<div class="post-caption"></div>
-</article>
-</template>
-
-
-<script src="/app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
