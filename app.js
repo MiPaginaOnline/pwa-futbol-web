@@ -53,6 +53,135 @@ const template = document.getElementById('post-template');
 const installBtn = document.getElementById('installBtn');
 const notification = document.getElementById('notification');
 const navButtons = document.querySelectorAll('.nav-btn');
+const forceInstallBtn = document.getElementById('forceInstall');
+
+// ==================== INSTALACIÓN PWA MEJORADA ====================
+let deferredPrompt;
+
+// DEBUG: Verificar estado de PWA
+function checkPWAStatus() {
+  console.log('=== DEBUG PWA STATUS ===');
+  console.log('Service Worker:', navigator.serviceWorker ? 'Soportado' : 'No soportado');
+  console.log('BeforeInstallPrompt:', deferredPrompt ? 'Disponible' : 'No disponible');
+  console.log('Display Mode:', window.matchMedia('(display-mode: standalone)').matches ? 'Standalone' : 'Browser');
+  console.log('HTTPS:', window.location.protocol === 'https:' ? 'Sí' : 'No');
+  console.log('URL:', window.location.href);
+  console.log('========================');
+}
+
+// Mostrar el botón de instalación cuando sea posible
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('🚀 beforeinstallprompt event fired');
+  
+  // Prevenir que el mini-infobar aparezca en mobile
+  e.preventDefault();
+  
+  // Guardar el evento para usarlo después
+  deferredPrompt = e;
+  
+  // Mostrar el botón de instalación
+  installBtn.style.display = 'flex';
+  
+  // Mostrar notificación
+  showNotification('¡Puedes instalar Fútbol Feed en tu dispositivo!');
+  
+  console.log('✅ Botón de instalación mostrado');
+});
+
+// Manejar el clic en el botón de instalación
+installBtn.addEventListener('click', async () => {
+  console.log('🖱️ Botón de instalación clickeado');
+  
+  if (!deferredPrompt) {
+    console.log('❌ No hay deferredPrompt disponible');
+    showNotification('La aplicación ya está instalada o no se puede instalar');
+    
+    // Mostrar botón forzado si no hay deferredPrompt
+    forceInstallBtn.style.display = 'block';
+    return;
+  }
+  
+  try {
+    // Mostrar el prompt de instalación
+    console.log('📱 Mostrando prompt de instalación...');
+    deferredPrompt.prompt();
+    
+    // Esperar a que el usuario responda al prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    console.log(`📝 Usuario ${outcome} la instalación`);
+    
+    if (outcome === 'accepted') {
+      showNotification('¡Fútbol Feed se está instalando! 🎉');
+      installBtn.style.display = 'none';
+      console.log('✅ Usuario aceptó la instalación');
+    } else {
+      showNotification('Instalación cancelada. Puedes intentarlo luego.');
+      console.log('❌ Usuario rechazó la instalación');
+    }
+    
+    // Limpiar el deferredPrompt para que solo se use una vez
+    deferredPrompt = null;
+    
+  } catch (error) {
+    console.error('💥 Error durante la instalación:', error);
+    showNotification('Error al instalar la aplicación');
+    forceInstallBtn.style.display = 'block';
+  }
+});
+
+// Botón de instalación forzada
+forceInstallBtn.addEventListener('click', function() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+  } else {
+    showNotification('No se puede instalar. Verifica que estés en HTTPS y recarga la página.');
+    checkPWAStatus();
+  }
+});
+
+// Detectar cuando la app se instala correctamente
+window.addEventListener('appinstalled', (evt) => {
+  console.log('🎊 ¡Aplicación instalada correctamente!');
+  installBtn.style.display = 'none';
+  forceInstallBtn.style.display = 'none';
+  showNotification('¡Fútbol Feed instalado correctamente! ⚽');
+});
+
+// Verificar si la app ya está instalada
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  console.log('📱 La aplicación ya está instalada (standalone)');
+  installBtn.style.display = 'none';
+  forceInstallBtn.style.display = 'none';
+}
+
+// Registrar Service Worker MEJORADO
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    console.log('🔧 Registrando Service Worker...');
+    
+    navigator.serviceWorker.register('service-worker.js')
+      .then(function(registration) {
+        console.log('✅ Service Worker registrado con éxito:', registration);
+        
+        // Verificar si hay una nueva versión del Service Worker
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('🔄 Nueva versión del Service Worker encontrada:', newWorker);
+        });
+      })
+      .catch(function(registrationError) {
+        console.error('❌ Error registrando Service Worker:', registrationError);
+        showNotification('Error en Service Worker');
+        forceInstallBtn.style.display = 'block';
+      });
+  });
+}
+
+// Ejecutar debug después de cargar
+setTimeout(checkPWAStatus, 3000);
+
+// ==================== FUNCIONALIDAD DE LA APP ====================
 
 // Renderizar la aplicación
 function render() {
@@ -363,63 +492,6 @@ navButtons.forEach(button => {
     render();
   });
 });
-
-// Instalación de PWA
-let deferredPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Mostrar el botón de instalación
-  installBtn.style.display = 'flex';
-  
-  // Mostrar notificación sobre la instalación
-  setTimeout(() => {
-    showNotification('¡Instala Fútbol Feed en tu dispositivo!');
-  }, 2000);
-});
-
-installBtn.addEventListener('click', async () => {
-  if (!deferredPrompt) {
-    showNotification('La aplicación ya está instalada o no se puede instalar');
-    return;
-  }
-  
-  // Mostrar el prompt de instalación
-  deferredPrompt.prompt();
-  
-  // Esperar a que el usuario responda
-  const { outcome } = await deferredPrompt.userChoice;
-  
-  if (outcome === 'accepted') {
-    showNotification('¡Fútbol Feed se está instalando!');
-    installBtn.style.display = 'none';
-  } else {
-    showNotification('Instalación cancelada');
-  }
-  
-  deferredPrompt = null;
-});
-
-// Verificar si la app ya está instalada
-window.addEventListener('appinstalled', () => {
-  installBtn.style.display = 'none';
-  showNotification('¡Fútbol Feed instalado correctamente!');
-});
-
-// Registrar Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('SW registrado: ', registration);
-      })
-      .catch(registrationError => {
-        console.log('Error en el SW: ', registrationError);
-      });
-  });
-}
 
 // Inicializar la aplicación
 render();
