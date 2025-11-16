@@ -1,115 +1,87 @@
-const CACHE_NAME = 'futbol-feed-v2';
-const OFFLINE_URL = '/';
-const ASSETS = [
+const CACHE_NAME = 'futbol-feed-v3';
+const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
   '/app.js',
-  '/manifest.json',
-  '/icons/icon-72.png',
-  '/icons/icon-96.png',
-  '/icons/icon-128.png',
-  '/icons/icon-144.png',
-  '/icons/icon-152.png',
-  '/icons/icon-192.png',
-  '/icons/icon-384.png',
-  '/icons/icon-512.png'
+  '/manifest.json'
 ];
 
-// Instalación del Service Worker
-self.addEventListener('install', (event) => {
-  console.log('Service Worker instalándose');
-  
+// Instalar Service Worker
+self.addEventListener('install', function(event) {
+  console.log('🟢 Service Worker instalándose...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Cache abierto');
-        return cache.addAll(ASSETS);
+      .then(function(cache) {
+        console.log('📦 Cache abierto, agregando archivos...');
+        return cache.addAll(urlsToCache);
       })
-      .then(() => {
-        console.log('Todos los recursos cacheados');
+      .then(function() {
+        console.log('✅ Todos los recursos cacheados correctamente');
         return self.skipWaiting();
       })
-      .catch((error) => {
-        console.error('Error durante la instalación:', error);
+      .catch(function(error) {
+        console.error('❌ Error en cache:', error);
       })
   );
 });
 
-// Activación del Service Worker
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activado');
-  
+// Activar Service Worker
+self.addEventListener('activate', function(event) {
+  console.log('🟡 Service Worker activado');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(function(cacheNames) {
       return Promise.all(
-        cacheNames.map((cacheName) => {
+        cacheNames.map(function(cacheName) {
           if (cacheName !== CACHE_NAME) {
-            console.log('Eliminando cache antigua:', cacheName);
+            console.log('🗑️ Eliminando cache antigua:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => {
-      console.log('Service Worker listo para controlar clientes');
+    }).then(function() {
+      console.log('✅ Service Worker listo para controlar clientes');
       return self.clients.claim();
     })
   );
 });
 
 // Interceptar solicitudes
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', function(event) {
   // Solo manejar solicitudes GET
   if (event.request.method !== 'GET') return;
-  
-  // Para solicitudes de navegación, servir la página offline si falla
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(OFFLINE_URL);
-      })
-    );
-    return;
-  }
-  
-  // Para otros recursos, usar estrategia cache-first
+
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        // Devolver desde cache si existe
+      .then(function(response) {
+        // Devuelve desde cache si está disponible
         if (response) {
           return response;
         }
-        
-        // Si no está en cache, hacer la solicitud
-        return fetch(event.request).then((response) => {
-          // Verificar si la respuesta es válida
+
+        // Si no está en cache, haz la solicitud a la red
+        return fetch(event.request).then(function(response) {
+          // Verifica si la respuesta es válida
           if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
-          
-          // Clonar la respuesta
-          const responseToCache = response.clone();
-          
-          // Almacenar en cache
+
+          // Clona la respuesta
+          var responseToCache = response.clone();
+
           caches.open(CACHE_NAME)
-            .then((cache) => {
+            .then(function(cache) {
               cache.put(event.request, responseToCache);
             });
-          
+
           return response;
         });
       })
-      .catch(() => {
-        // Si todo falla, intentar servir desde cache
-        return caches.match(event.request);
+      .catch(function() {
+        // Si falla todo, intenta servir la página offline
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
       })
   );
-});
-
-// Manejar mensajes desde la aplicación
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
 });
