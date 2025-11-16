@@ -4,10 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Fútbol Feed ⚽ — PWA</title>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
   <meta name="theme-color" content="#0b5f3b">
-  <link rel="icon" href="/icons/icon-192.png">
-  <link rel="stylesheet" href="/styles.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fútbol Feed">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link rel="icon" href="icons/icon-192x192.png">
+  <link rel="stylesheet" href="styles.css">
   <meta name="description" content="La mejor app de contenido futbolero. Goles, noticias y mucho más.">
 </head>
 <body>
@@ -88,7 +92,12 @@
   </template>
 
   <div id="notification" class="notification" aria-live="polite"></div>
+  
+  <!-- Botón de instalación forzada para debugging -->
+  <button id="forceInstall" class="force-install-btn" style="display:none;">
+    ⚠️ INSTALACIÓN FORZADA
+  </button>
 
-  <script src="/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
