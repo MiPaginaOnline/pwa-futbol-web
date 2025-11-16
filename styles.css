@@ -437,3 +437,23 @@ html, body {
 .loading {
   animation: pulse 1.5s ease-in-out infinite;
 }
+
+/* Botón de instalación forzada */
+.force-install-btn {
+  position: fixed;
+  top: 70px;
+  right: 10px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.force-install-btn:hover {
+  background: #dc2626;
+}
